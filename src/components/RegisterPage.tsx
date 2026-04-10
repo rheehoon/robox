@@ -39,8 +39,19 @@ export default function RegisterPage({ onNavigate }: Props) {
     tradeMethod:'직거래', tradeRegion:'', description:''
   })
 
-  const subKey = catType === 'life' ? 'life' : midType
+const subKey = catType === 'life' ? 'life' : midType
   const subs = subOptions[subKey]
+  const [images, setImages] = useState<File[]>([])
+  const [previews, setPreviews] = useState<string[]>([])
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    if(files.length === 0) return
+    const newImages = [...images, ...files].slice(0, 10)
+    setImages(newImages)
+    const newPreviews = newImages.map(f => URL.createObjectURL(f))
+    setPreviews(newPreviews)
+  }
 
   const inp = (field: string) => (e: React.ChangeEvent<HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement>) =>
     setForm(f=>({...f,[field]:e.target.value}))
@@ -66,18 +77,21 @@ export default function RegisterPage({ onNavigate }: Props) {
             <span style={{width:20,height:20,borderRadius:'50%',background:'#00d4a1',color:'#0f172a',fontSize:10,fontWeight:500,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>1</span>
             사진 등록
           </div>
-          <div style={{background:'#fff',borderRadius:16,border:'0.5px solid #e2e8f0',padding:14}}>
+<div style={{background:'#fff',borderRadius:16,border:'0.5px solid #e2e8f0',padding:14}}>
             <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
-              <div style={{aspectRatio:'1',borderRadius:10,border:'0.5px dashed #00d4a1',background:'#f0fdf9',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:3,cursor:'pointer'}}>
-                <div style={{fontSize:20,color:'#00a37a'}}>+</div>
-                <div style={{fontSize:9,color:'#00a37a',fontWeight:500}}>대표사진</div>
-              </div>
-              {[1,2,3].map(i=>(
-                <div key={i} style={{aspectRatio:'1',borderRadius:10,border:'0.5px dashed #cbd5e1',background:'#f1f5f9',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:3,cursor:'pointer'}}>
-                  <div style={{fontSize:20,color:'#94a3b8'}}>+</div>
-                  <div style={{fontSize:9,color:'#94a3b8'}}>추가</div>
+              {previews.map((src,i)=>(
+                <div key={i} style={{aspectRatio:'1',borderRadius:10,overflow:'hidden',position:'relative'}}>
+                  <img src={src} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+                  {i===0 && <div style={{position:'absolute',bottom:0,left:0,right:0,background:'rgba(0,212,161,0.85)',fontSize:9,color:'#0f172a',textAlign:'center',padding:'2px 0',fontWeight:500}}>대표</div>}
                 </div>
               ))}
+              {previews.length < 10 && (
+                <label style={{aspectRatio:'1',borderRadius:10,border:`0.5px dashed ${previews.length===0?'#00d4a1':'#cbd5e1'}`,background:previews.length===0?'#f0fdf9':'#f1f5f9',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:3,cursor:'pointer'}}>
+                  <div style={{fontSize:20,color:previews.length===0?'#00a37a':'#94a3b8'}}>+</div>
+                  <div style={{fontSize:9,color:previews.length===0?'#00a37a':'#94a3b8',fontWeight:previews.length===0?500:400}}>{previews.length===0?'대표사진':'추가'}</div>
+                  <input type="file" accept="image/*" multiple style={{display:'none'}} onChange={handleImageSelect}/>
+                </label>
+              )}
             </div>
             <div style={{fontSize:11,color:'#94a3b8',marginTop:8,textAlign:'center'}}>최대 10장 · 첫 번째 사진이 대표 이미지로 설정됩니다</div>
           </div>
@@ -267,7 +281,19 @@ export default function RegisterPage({ onNavigate }: Props) {
               setLoading(true)
               const { data: { user } } = await supabase.auth.getUser()
               if(!user){ setError('로그인이 필요합니다.'); setLoading(false); return }
-              const { error } = await supabase.from('robots').insert({
+let imageUrls: string[] = []
+              if(images.length > 0) {
+                for(const img of images) {
+                  const ext = img.name.split('.').pop()
+                  const path = `${user.id}/${Date.now()}.${ext}`
+                  const { error: upErr } = await supabase.storage.from('robot-images').upload(path, img)
+                  if(!upErr) {
+                    const { data } = supabase.storage.from('robot-images').getPublicUrl(path)
+                    imageUrls.push(data.publicUrl)
+                  }
+                }
+              }             
+ const { error } = await supabase.from('robots').insert({
                 user_id: user.id,
                 category: catType==='industrial' ? '산업용' : '생활용',
                 sub_category: catType==='industrial' ? (midType==='mfg'?'제조업':'서비스업') : '생활용',
