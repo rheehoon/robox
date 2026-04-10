@@ -19,19 +19,20 @@ import { CartItem } from '@/app/page'
 interface Props {
   onNavigate: (screen: string) => void
   onAddToCart: (item: CartItem) => void
+  product?: any
 }
 
-export default function DetailPage({ onNavigate, onAddToCart }: Props) {
+export default function DetailPage({ onNavigate, onAddToCart, product }: Props) {
   const [wished, setWished] = useState(false)
   const [cartAdded, setCartAdded] = useState(false)
 
   const handleAddToCart = () => {
     onAddToCart({
-      id: 1,
-      emoji: '🦾',
-      name: 'FANUC M-20iB / 30F',
-      sub: '용접·접합 · 경기 화성시',
-      price: '28,000,000'
+      id: product?.id || 1,
+      emoji: '🤖',
+      name: product?.model_name || 'FANUC M-20iB / 30F',
+      sub: product?.detail_category || '용접·접합 · 경기 화성시',
+      price: product?.sale_price?.toLocaleString() || '28,000,000'
     })
     setCartAdded(true)
     setTimeout(() => setCartAdded(false), 2000)
@@ -67,7 +68,11 @@ export default function DetailPage({ onNavigate, onAddToCart }: Props) {
 
       {/* 상품 이미지 */}
       <div style={{height:200,background:'#e2e8f0',display:'flex',alignItems:'center',justifyContent:'center',position:'relative'}}>
-        <span style={{fontSize:72}}>🦾</span>
+       {product?.image_url ? (
+          <img src={product.image_url} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+        ) : (
+          <span style={{fontSize:72}}>🤖</span>
+        )}
         <div style={{position:'absolute',bottom:12,left:'50%',transform:'translateX(-50%)',display:'flex',gap:5}}>
           {[0,1,2,3].map(i=>(
             <div key={i} style={{width: i===0 ? 18 : 6,height:6,borderRadius: i===0 ? 3 : '50%',background: i===0 ? '#fff' : 'rgba(255,255,255,0.5)'}}/>
@@ -83,8 +88,8 @@ export default function DetailPage({ onNavigate, onAddToCart }: Props) {
       </div>
 
       {/* 제목 */}
-      <div style={{fontSize:18,fontWeight:500,color:'#0f172a',padding:'8px 16px 2px'}}>FANUC M-20iB / 30F</div>
-      <div style={{fontSize:12,color:'#94a3b8',padding:'0 16px 12px'}}>경기도 화성시 · 2시간 전 등록</div>
+      <div style={{fontSize:18,fontWeight:500,color:'#0f172a',padding:'8px 16px 2px'}}>{product?.model_name || 'FANUC M-20iB / 30F'}</div>
+      <div style={{fontSize:12,color:'#94a3b8',padding:'0 16px 12px'}}>{product?.trade_region || '경기도 화성시'} · {product?.created_at ? new Date(product.created_at).toLocaleDateString() : '2시간 전 등록'}</div>
 
       <div style={{height:'0.5px',background:'#e2e8f0',margin:'0 16px'}}/>
 
@@ -94,7 +99,7 @@ export default function DetailPage({ onNavigate, onAddToCart }: Props) {
           <div>
             <div style={{fontSize:11,color:'#94a3b8',marginBottom:2}}>판매희망가</div>
             <div style={{display:'flex',alignItems:'baseline',gap:4}}>
-              <span style={{fontSize:22,fontWeight:500,color:'#0f172a'}}>28,000,000</span>
+              <span style={{fontSize:22,fontWeight:500,color:'#0f172a'}}>{product?.sale_price?.toLocaleString() || '28,000,000'}</span>
               <span style={{fontSize:13,color:'#64748b'}}>원</span>
             </div>
           </div>

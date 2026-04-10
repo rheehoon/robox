@@ -61,8 +61,9 @@ const categories = [
 interface Props { 
   onNavigate: (screen: string) => void
   cartCount: number
+  onSelectProduct: (product: any) => void
 }
-export default function HomePage({ onNavigate, cartCount }: Props) {
+export default function HomePage({ onNavigate, cartCount, onSelectProduct }: Props) {
   const supabase = createClient()
   const [dbProducts, setDbProducts] = useState<any[]>([])
 
@@ -146,7 +147,7 @@ export default function HomePage({ onNavigate, cartCount }: Props) {
         </div>
         <div style={{display:'flex',gap:10,padding:'0 16px',overflowX:'auto',marginBottom:4,paddingBottom:4}}>
           {categories.map(cat=>(
-            <div key={cat.id} style={{minWidth:64,textAlign:'center',cursor:'pointer'}} onClick={()=>onNavigate('cat')}>
+            <div key={p.id||i} style={{minWidth:148,background:'#fff',borderRadius:14,border:'0.5px solid #e2e8f0',overflow:'hidden',flexShrink:0,cursor:'pointer'}} onClick={()=>onSelectProduct(p)}>
               <div style={{width:50,height:50,borderRadius:14,background:cat.bg,display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 6px'}}>
                 {cat.icon}
               </div>
@@ -181,7 +182,13 @@ export default function HomePage({ onNavigate, cartCount }: Props) {
         <div style={{display:'flex',gap:10,padding:'0 16px',overflowX:'auto',paddingBottom:16}}>
           {lifeProducts.map(p=>(
             <div key={p.id} style={{minWidth:148,background:'#fff',borderRadius:14,border:'0.5px solid #e2e8f0',overflow:'hidden',flexShrink:0,cursor:'pointer'}} onClick={()=>onNavigate('detail')}>
-              <div style={{height:90,background:p.bg,display:'flex',alignItems:'center',justifyContent:'center',fontSize:36}}>{p.emoji}</div>
+              <div style={{height:90,background:p.bg||'#f0fdf9',display:'flex',alignItems:'center',justifyContent:'center',fontSize:36,overflow:'hidden'}}>
+                {p.image_url ? (
+                  <img src={p.image_url} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+                ) : (
+                  <span>{p.emoji||'🤖'}</span>
+                )}
+              </div>
               <div style={{padding:'8px 10px 10px'}}>
                 <div style={{fontSize:12,fontWeight:500,color:'#0f172a',marginBottom:2}}>{p.name}</div>
                 <div style={{fontSize:11,color:'#64748b',marginBottom:4}}>{p.sub}</div>

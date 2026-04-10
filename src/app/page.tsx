@@ -25,6 +25,7 @@ export default function App() {
   const [cart, setCart] = useState<CartItem[]>([])
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [selectedProduct, setSelectedProduct] = useState<any>(null)
 
   const supabase = createClient()
 
@@ -78,10 +79,10 @@ export default function App() {
 
   const renderScreen = () => {
     switch(screen) {
-      case 'home': return <HomePage onNavigate={setScreen} cartCount={cart.length} />
+      case 'home': return <HomePage onNavigate={setScreen} cartCount={cart.length} onSelectProduct={(p)=>{setSelectedProduct(p);setScreen('detail')}} />
       case 'cat': return <CategoryPage onNavigate={setScreen} />
       case 'reg': return <RegisterPage onNavigate={setScreen} />
-      case 'detail': return <DetailPage onNavigate={setScreen} onAddToCart={addToCart} />
+      case 'detail': return <DetailPage onNavigate={setScreen} onAddToCart={addToCart} product={selectedProduct} />
       case 'wish': return <WishPage onNavigate={setScreen} />
       case 'cart': return <CartPage onNavigate={setScreen} cart={cart} onRemove={removeFromCart} />
       case 'my': return <MyPage onNavigate={setScreen} user={user} onLogout={async()=>{await supabase.auth.signOut();setUser(null)}} />
