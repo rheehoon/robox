@@ -3,10 +3,10 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
 
 const LOGO = () => (
-  <div style={{display:'flex',alignItems:'center',justifyContent:'center',marginBottom:24}}>
-    <span style={{fontSize:32,fontWeight:500,letterSpacing:-1,color:'#0f172a',lineHeight:1}}>Robo</span>
-    <div style={{width:38,height:38,position:'relative',marginLeft:6,overflow:'visible',display:'flex',alignItems:'center',justifyContent:'center'}}>
-      <svg width="46" height="46" viewBox="0 0 38 38" overflow="visible" style={{overflow:'visible'}}>
+  <div style={{display:'flex',alignItems:'center'}}>
+    <span style={{fontSize:24,fontWeight:500,letterSpacing:-1,color:'#fff',lineHeight:1}}>Robo</span>
+    <div style={{width:30,height:30,position:'relative',marginLeft:6,overflow:'visible',display:'flex',alignItems:'center',justifyContent:'center'}}>
+      <svg width="38" height="38" viewBox="0 0 38 38" overflow="visible" style={{overflow:'visible'}}>
         <rect x="3" y="3" width="32" height="32" rx="7" fill="#0f172a"/>
         <line x1="-2" y1="-2" x2="40" y2="40" stroke="#00d4a1" strokeWidth="7" strokeLinecap="round"/>
         <line x1="40" y1="-2" x2="-2" y2="40" stroke="#00d4a1" strokeWidth="7" strokeLinecap="round"/>
@@ -72,66 +72,81 @@ export default function AuthPage({ onSuccess }: Props) {
   } as React.CSSProperties
 
   return (
-    <div style={{minHeight:'100vh',background:'#f8fafc',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'0 24px'}}>
-      <LOGO />
+    <div style={{minHeight:'100vh',background:'#f8fafc',display:'flex',flexDirection:'column'}}>
 
-      <div style={{width:'100%',maxWidth:360,background:'#fff',borderRadius:20,border:'0.5px solid #e2e8f0',padding:24}}>
-        {/* 탭 */}
-        <div style={{display:'flex',background:'#f1f5f9',borderRadius:12,padding:3,marginBottom:24}}>
-          {(['login','signup'] as const).map(m=>(
-            <button key={m} onClick={()=>{setMode(m);setError('');setMessage('')}}
-              style={{flex:1,padding:'9px 0',borderRadius:10,fontSize:14,fontWeight:500,border:'none',cursor:'pointer',
-                background: mode===m ? '#0f172a' : 'transparent',
-                color: mode===m ? '#00d4a1' : '#64748b'}}>
-              {m==='login' ? '로그인' : '회원가입'}
-            </button>
-          ))}
+      {/* 상단 바 — 홈화면과 동일 */}
+      <div style={{background:'#00D4A1'}}>
+        <div style={{padding:'14px 18px 0',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+          <LOGO />
         </div>
-
-        {message && (
-          <div style={{background:'#f0fdf9',border:'0.5px solid #a7f3d0',borderRadius:10,padding:'12px 14px',marginBottom:16,fontSize:13,color:'#065f46'}}>
-            {message}
+        <div style={{padding:'12px 16px 16px'}}>
+          <div style={{fontSize:13,color:'#065f46',fontWeight:500}}>
+            {mode==='login' ? '로그인하고 로봇을 거래하세요' : '회원가입하고 시작하세요'}
           </div>
-        )}
-
-        {error && (
-          <div style={{background:'#fff1f2',border:'0.5px solid #fecdd3',borderRadius:10,padding:'12px 14px',marginBottom:16,fontSize:13,color:'#e11d48'}}>
-            {error}
-          </div>
-        )}
-
-        {mode === 'signup' && (
-          <>
-            <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:5,fontWeight:500}}>이름</label>
-            <input style={inp} placeholder="홍길동" value={name} onChange={e=>setName(e.target.value)}/>
-            <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:5,fontWeight:500}}>전화번호 (선택)</label>
-            <input style={inp} type="tel" placeholder="010-0000-0000" value={phone} onChange={e=>setPhone(e.target.value)}/>
-          </>
-        )}
-
-        <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:5,fontWeight:500}}>이메일</label>
-        <input style={inp} type="email" placeholder="example@email.com" value={email} onChange={e=>setEmail(e.target.value)}/>
-
-        <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:5,fontWeight:500}}>비밀번호</label>
-        <input style={{...inp,marginBottom:20}} type="password" placeholder="6자 이상" value={password} onChange={e=>setPassword(e.target.value)}/>
-
-        <button
-          onClick={mode==='login' ? handleLogin : handleSignup}
-          disabled={loading}
-          style={{width:'100%',padding:14,background: loading ? '#94a3b8' : '#00d4a1',color:'#0f172a',border:'none',borderRadius:12,fontSize:15,fontWeight:500,cursor: loading ? 'not-allowed' : 'pointer'}}>
-          {loading ? '처리 중...' : mode==='login' ? '로그인' : '회원가입'}
-        </button>
-
-        {mode==='login' && (
-          <button onClick={()=>{setMode('signup');setError('')}}
-            style={{width:'100%',marginTop:12,padding:'10px 0',background:'none',border:'none',fontSize:13,color:'#64748b',cursor:'pointer'}}>
-            아직 계정이 없으신가요? <span style={{color:'#00a37a',fontWeight:500}}>회원가입</span>
-          </button>
-        )}
+        </div>
       </div>
 
-      <div style={{marginTop:16,fontSize:12,color:'#94a3b8',textAlign:'center'}}>
-        RoboX · 중고로봇 거래 플랫폼
+      {/* 폼 */}
+      <div style={{flex:1,padding:'24px 16px'}}>
+        <div style={{background:'#fff',borderRadius:20,border:'0.5px solid #e2e8f0',padding:20}}>
+
+          {/* 탭 */}
+          <div style={{display:'flex',background:'#f1f5f9',borderRadius:12,padding:3,marginBottom:20}}>
+            {(['login','signup'] as const).map(m=>(
+              <button key={m} onClick={()=>{setMode(m);setError('');setMessage('')}}
+                style={{flex:1,padding:'9px 0',borderRadius:10,fontSize:14,fontWeight:500,border:'none',cursor:'pointer',
+                  background: mode===m ? '#0f172a' : 'transparent',
+                  color: mode===m ? '#00d4a1' : '#64748b'}}>
+                {m==='login' ? '로그인' : '회원가입'}
+              </button>
+            ))}
+          </div>
+
+          {message && (
+            <div style={{background:'#f0fdf9',border:'0.5px solid #a7f3d0',borderRadius:10,padding:'12px 14px',marginBottom:16,fontSize:13,color:'#065f46'}}>
+              {message}
+            </div>
+          )}
+
+          {error && (
+            <div style={{background:'#fff1f2',border:'0.5px solid #fecdd3',borderRadius:10,padding:'12px 14px',marginBottom:16,fontSize:13,color:'#e11d48'}}>
+              {error}
+            </div>
+          )}
+
+          {mode === 'signup' && (
+            <>
+              <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:5,fontWeight:500}}>이름</label>
+              <input style={inp} placeholder="홍길동" value={name} onChange={e=>setName(e.target.value)}/>
+              <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:5,fontWeight:500}}>전화번호 (선택)</label>
+              <input style={inp} type="tel" placeholder="010-0000-0000" value={phone} onChange={e=>setPhone(e.target.value)}/>
+            </>
+          )}
+
+          <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:5,fontWeight:500}}>이메일</label>
+          <input style={inp} type="email" placeholder="example@email.com" value={email} onChange={e=>setEmail(e.target.value)}/>
+
+          <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:5,fontWeight:500}}>비밀번호</label>
+          <input style={{...inp,marginBottom:20}} type="password" placeholder="6자 이상" value={password} onChange={e=>setPassword(e.target.value)}/>
+
+          <button
+            onClick={mode==='login' ? handleLogin : handleSignup}
+            disabled={loading}
+            style={{width:'100%',padding:14,background: loading ? '#94a3b8' : '#00d4a1',color:'#0f172a',border:'none',borderRadius:12,fontSize:15,fontWeight:500,cursor: loading ? 'not-allowed' : 'pointer'}}>
+            {loading ? '처리 중...' : mode==='login' ? '로그인' : '회원가입'}
+          </button>
+
+          {mode==='login' && (
+            <button onClick={()=>{setMode('signup');setError('')}}
+              style={{width:'100%',marginTop:12,padding:'10px 0',background:'none',border:'none',fontSize:13,color:'#64748b',cursor:'pointer'}}>
+              아직 계정이 없으신가요? <span style={{color:'#00a37a',fontWeight:500}}>회원가입</span>
+            </button>
+          )}
+        </div>
+
+        <div style={{marginTop:16,fontSize:12,color:'#94a3b8',textAlign:'center'}}>
+          RoboX · 중고로봇 거래 플랫폼
+        </div>
       </div>
     </div>
   )
