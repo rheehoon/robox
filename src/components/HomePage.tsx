@@ -1,4 +1,6 @@
 'use client'
+import { useState, useEffect } from 'react'
+import { createClient } from '@/lib/supabase'
 
 const LOGO = () => (
   <div className="flex items-center">
@@ -61,6 +63,21 @@ interface Props {
   cartCount: number
 }
 export default function HomePage({ onNavigate, cartCount }: Props) {
+  const supabase = createClient()
+  const [dbProducts, setDbProducts] = useState<any[]>([])
+
+  useEffect(()=>{
+    supabase
+      .from('robots')
+      .select('*')
+      .eq('status','판매중')
+      .order('created_at',{ascending:false})
+      .limit(10)
+      .then(({data})=>{ if(data) setDbProducts(data) })
+  },[])
+
+  const displayProducts = dbProducts.length > 0 ? dbProducts : products
+
   return (
     <div>
       {/* 상단 바 */}
@@ -139,21 +156,17 @@ export default function HomePage({ onNavigate, cartCount }: Props) {
         </div>
 
         {/* 최근 매물 */}
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'0 16px',marginTop:16,marginBottom:10}}>
-          <span style={{fontSize:13,fontWeight:500,color:'#0f172a'}}>최근 등록 매물</span>
-          <span style={{fontSize:11,color:'#94a3b8'}}>23분 전</span>
-        </div>
-        <div style={{display:'flex',gap:10,padding:'0 16px',overflowX:'auto',paddingBottom:4}}>
-          {products.map(p=>(
+<div style={{display:'flex',gap:10,padding:'0 16px',overflowX:'auto',paddingBottom:4}}>
+          {displayProducts.map((p,i)=>(
             <div key={p.id} style={{minWidth:148,background:'#fff',borderRadius:14,border:'0.5px solid #e2e8f0',overflow:'hidden',flexShrink:0,cursor:'pointer'}} onClick={()=>onNavigate('detail')}>
               <div style={{height:90,background:p.bg,display:'flex',alignItems:'center',justifyContent:'center',fontSize:36}}>{p.emoji}</div>
               <div style={{padding:'8px 10px 10px'}}>
-                <div style={{fontSize:12,fontWeight:500,color:'#0f172a',marginBottom:2}}>{p.name}</div>
-                <div style={{fontSize:11,color:'#64748b',marginBottom:4}}>{p.sub}</div>
-                <div style={{fontSize:13,fontWeight:500,color:'#0f172a'}}>₩{p.price}</div>
+                <div style={{fontSize:12,fontWeight:500,color:'#0f172a',marginBottom:2}}>{p.model_name || p.name}</div>
+                <div style={{fontSize:11,color:'#64748b',marginBottom:4}}>{p.detail_category || p.sub}</div>
+                <div style={{fontSize:13,fontWeight:500,color:'#0f172a'}}>₩{p.sale_price ? p.sale_price.toLocaleString() : p.price}</div>
                 <div style={{display:'flex',gap:4,marginTop:4,flexWrap:'wrap'}}>
-                  <span style={{fontSize:10,padding:'2px 6px',borderRadius:5,fontWeight:500,background:'#fef3c7',color:'#92400e'}}>{p.year}</span>
-                  {p.safe && <span style={{fontSize:10,padding:'2px 6px',borderRadius:5,fontWeight:500,background:'#dbeafe',color:'#1e40af'}}>검수완료</span>}
+                  <span style={{fontSize:10,padding:'2px 6px',borderRadius:5,fontWeight:500,background:'#fef3c7',color:'#92400e'}}>{p.condition || p.year}</span>
+                  {(p.status==='판매중') && <span style={{fontSize:10,padding:'2px 6px',borderRadius:5,fontWeight:500,background:'#d1fae5',color:'#065f46'}}>판매중</span>}
                 </div>
               </div>
             </div>
