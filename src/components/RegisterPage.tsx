@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { createClient } from '@/lib/supabase'
 
 const LOGO = ({ title }: { title: string }) => (
   <div className="flex items-center">
@@ -23,10 +24,14 @@ const subOptions: Record<string, string[]> = {
 interface Props { onNavigate: (screen: string) => void }
 
 export default function RegisterPage({ onNavigate }: Props) {
+  const supabase = createClient()
   const [catType, setCatType] = useState<'industrial'|'life'>('industrial')
   const [midType, setMidType] = useState<'mfg'|'svc'>('mfg')
   const [condition, setCondition] = useState('최상 A')
   const [negotiable, setNegotiable] = useState(true)
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState('')
   const [form, setForm] = useState({
     manufacturer:'', modelName:'', modelNumber:'',
     purchaseDate:'', usageMonths:'', purchasePrice:'', salePrice:'',
@@ -240,9 +245,54 @@ export default function RegisterPage({ onNavigate }: Props) {
         </div>
 
         {/* 등록 버튼 */}
+        {error && (
+          <div style={{margin:'0 16px',background:'#fff1f2',border:'0.5px solid #fecdd3',borderRadius:12,padding:'12px 14px',fontSize:13,color:'#e11d48'}}>
+            {error}
+          </div>
+        )}
+        {success && (
+          <div style={{margin:'0 16px',background:'#f0fdf9',border:'0.5px solid #a7f3d0',borderRadius:12,padding:'12px 14px',fontSize:13,color:'#065f46'}}>
+            ✅ 매물이 등록됐습니다!
+          </div>
+        )}
         <div style={{padding:16}}>
-          <button style={{width:'100%',padding:14,background:'#00d4a1',color:'#0f172a',border:'none',borderRadius:14,fontSize:15,fontWeight:500,cursor:'pointer'}}>
-            등록하기
+          <button
+            disabled={loading}
+            onClick={async()=>{
+              setError('')
+              if(!form.manufacturer||!form.modelName||!form.salePrice){
+                setError('제조회사, 제품명, 판매희망가는 필수입니다.')
+                return
+              }
+              setLoading(true)
+              const { data: { user } } = await supabase.auth.getUser()
+              if(!user){ setError('로그인이 필요합니다.'); setLoading(false); return }
+              const { error } = await supabase.from('robots').insert({
+                user_id: user.id,
+                category: catType==='industrial' ? '산업용' : '생활용',
+                sub_category: catType==='industrial' ? (midType==='mfg'?'제조업':'서비스업') : '생활용',
+                detail_category: document.querySelector('#r-sub') ? (document.querySelector('#r-sub') as HTMLSelectElement).value : '',
+                manufacturer: form.manufacturer,
+                model_name: form.modelName,
+                model_number: form.modelNumber,
+                purchase_date: form.purchaseDate || null,
+                usage_months: form.usageMonths ? parseInt(form.usageMonths) : null,
+                condition: condition,
+                purchase_price: form.purchasePrice ? parseInt(form.purchasePrice) : null,
+                sale_price: parseInt(form.salePrice),
+                negotiable: negotiable,
+                install_support: form.installSupport,
+                trade_method: form.tradeMethod,
+                trade_region: form.tradeRegion,
+                description: form.description,
+                status: '판매중'
+              })
+              if(error){ setError('등록 중 오류가 발생했습니다: '+error.message) }
+              else { setSuccess(true); setTimeout(()=>onNavigate('home'),2000) }
+              setLoading(false)
+            }}
+            style={{width:'100%',padding:14,background: loading?'#94a3b8':'#00d4a1',color:'#0f172a',border:'none',borderRadius:14,fontSize:15,fontWeight:500,cursor: loading?'not-allowed':'pointer'}}>
+            {loading ? '등록 중...' : '등록하기'}
           </button>
         </div>
 
