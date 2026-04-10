@@ -37,9 +37,13 @@ const settingItems = [
   { icon:'ℹ️', label:'고객센터 · 신고', sub:'' },
 ]
 
-interface Props { onNavigate: (screen: string) => void }
+interface Props {
+  onNavigate: (screen: string) => void
+  user: any
+  onLogout: () => void
+}
 
-export default function MyPage({ onNavigate }: Props) {
+export default function MyPage({ onNavigate, user, onLogout }: Props) {
   const [tradeTab, setTradeTab] = useState<'sell'|'buy'>('sell')
   const list = tradeTab === 'sell' ? sellList : buyList
 
@@ -66,7 +70,7 @@ export default function MyPage({ onNavigate }: Props) {
             <div style={{width:52,height:52,borderRadius:'50%',background:'#0f172a',display:'flex',alignItems:'center',justifyContent:'center',color:'#00d4a1',fontSize:18,fontWeight:500,flexShrink:0}}>KM</div>
             <div>
               <div style={{fontSize:16,fontWeight:500,color:'#0f172a',marginBottom:3}}>김민준</div>
-              <div style={{fontSize:12,color:'#94a3b8'}}>minjun@robox.io</div>
+              <div style={{fontSize:12,color:'#94a3b8'}}>{user?.email}</div>
             </div>
             <button style={{marginLeft:'auto',fontSize:12,padding:'6px 12px',borderRadius:8,border:'0.5px solid #e2e8f0',background:'#f8fafc',color:'#64748b',cursor:'pointer'}}>프로필 수정</button>
           </div>
@@ -148,7 +152,9 @@ export default function MyPage({ onNavigate }: Props) {
 
         {/* 로그아웃 */}
         <div style={{padding:'4px 16px 16px'}}>
-          <button style={{width:'100%',padding:13,background:'#fff',color:'#e11d48',border:'0.5px solid #fecdd3',borderRadius:14,fontSize:14,fontWeight:500,cursor:'pointer'}}>
+<button
+            onClick={onLogout}
+            style={{width:'100%',padding:13,background:'#fff',color:'#e11d48',border:'0.5px solid #fecdd3',borderRadius:14,fontSize:14,fontWeight:500,cursor:'pointer'}}>
             로그아웃
           </button>
         </div>
