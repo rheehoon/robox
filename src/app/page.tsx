@@ -86,7 +86,7 @@ export default function App() {
       case 'wish': return <WishPage onNavigate={setScreen} />
       case 'cart': return <CartPage onNavigate={setScreen} cart={cart} onRemove={removeFromCart} />
       case 'my': return <MyPage onNavigate={setScreen} user={user} onLogout={async()=>{await supabase.auth.signOut();setUser(null)}} />
-      default: return <HomePage onNavigate={setScreen} cartCount={cart.length} />
+      default: return <HomePage onNavigate={setScreen} cartCount={cart.length} onSelectProduct={(p)=>{setSelectedProduct(p);setScreen('detail')}} />
     }
   }
 
